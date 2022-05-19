@@ -2,20 +2,50 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import axios from 'axios';
 import { detailedDiff } from 'deep-object-diff';
 import { ITeslaLocationsListLocation } from './interfaces/interfaces';
-
-export async function getAllLocations(): Promise<ITeslaLocationsListLocation[]> {
+import deepEqual from 'deep-equal';
+/**
+ *
+ * @param startIndex Starting index, random if not specified
+ * @param length Number of items to check
+ * @returns
+ */
+export async function getAllLocations(startIndex?: number, length?: number): Promise<ITeslaLocationsListLocation[]> {
   console.log(`Retrieving all locations...`);
+
   const res = await axios.get('https://www.tesla.com/cua-api/tesla-locations');
   console.log(`${res.data.length} locations retrieved.`);
-  return res.data;
+
+  // random start index if not specified
+  if (!startIndex) {
+    startIndex = Math.floor(Math.random() * res.data.length);
+  }
+
+  // filter items
+  // substract 10  because we keep 10 slots for the recent items
+
+  const recentItems = (res.data as any[]).splice(res.data.length - 10, 10);
+  const items = (res.data as any[]).splice(startIndex, (length || 0) - 10);
+  items.push(...recentItems);
+  console.log(`Scanning ${items.length} locations starting at index ${startIndex}...`);
+  return items;
 }
 
+/**
+ * Fetch details for a specific location
+ * @param location_id
+ * @returns
+ */
 export async function getLocationDetails(location_id: string): Promise<object> {
   console.log(`Fetching infos for location ${location_id} ...`);
   const res = await axios.get(`https://www.tesla.com/cua-api/tesla-location?id=${location_id}`);
   return res.data;
 }
 
+/**
+ * Save a location info
+ * @param location
+ * @param supabase
+ */
 export async function saveLocation(location: any, supabase: SupabaseClient): Promise<void> {
   console.log(`Saving location ${location.location_id} ...`);
 
@@ -23,8 +53,15 @@ export async function saveLocation(location: any, supabase: SupabaseClient): Pro
 
   // entry exists, update it
   if (existing.data && existing.data[0]) {
+    const existingLocation = existing.data[0];
+
+    //stop if there is no difference
+    if (deepEqual(existingLocation.data, location)) {
+      return;
+    }
+
     //generate a diff
-    const diff = detailedDiff(existing.data[0].data, location);
+    const diff = detailedDiff(existingLocation.data, location);
     // update item
     await supabase
       .from('tesla_locations')
