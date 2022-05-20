@@ -2,9 +2,9 @@ name: Scan locations
 on:
   workflow_dispatch:
   schedule:
-    # At minute 0 past every 3rd hour.
-    # https://crontab.guru/every-1-hours
-    - cron: "0 */3 * * *"
+    # every 30 min
+    # https://crontab.guru
+    - cron: "*/30 * * * *"
 jobs:
   scan-locations:
     runs-on: ubuntu-latest
