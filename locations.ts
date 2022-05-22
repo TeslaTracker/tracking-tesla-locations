@@ -78,5 +78,6 @@ export async function saveLocation(location: any, supabase: SupabaseClient): Pro
   await supabase.from('tesla_locations').insert({
     location_id: location.location_id,
     data: location,
+    updated_at: new Date(),
   });
 }
