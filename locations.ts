@@ -57,11 +57,15 @@ export async function saveLocation(location: any, supabase: SupabaseClient): Pro
 
     //stop if there is no difference
     if (deepEqual(existingLocation.data, location)) {
+      console.log(`No changes detected for location ${location.location_id} skipping ...`);
       return;
     }
 
     //generate a diff
     const diff = detailedDiff(existingLocation.data, location);
+
+    console.log(`Updating location ${location.location_id}`);
+
     // update item
     await supabase
       .from('tesla_locations')
@@ -72,12 +76,13 @@ export async function saveLocation(location: any, supabase: SupabaseClient): Pro
       .eq('location_id', location.location_id);
     // add history entry
     await supabase.from('tesla_locations_changes').insert({ location_id: location.location_id, diff });
+  } else {
+    console.log(`Adding new location ${location.location_id}`);
+    // entry doesn't exists, insert it
+    await supabase.from('tesla_locations').insert({
+      location_id: location.location_id,
+      data: location,
+      updated_at: new Date(),
+    });
   }
-
-  // entry doesn't exists, insert it
-  await supabase.from('tesla_locations').insert({
-    location_id: location.location_id,
-    data: location,
-    updated_at: new Date(),
-  });
 }
