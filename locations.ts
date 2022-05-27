@@ -47,6 +47,11 @@ export async function getLocationDetails(location_id: string): Promise<object> {
  * @param supabase
  */
 export async function saveLocation(location: any, supabase: SupabaseClient): Promise<void> {
+  if (!location.location_id) {
+    console.log(`Location has no location_id. Skipping...`);
+    return;
+  }
+
   console.log(`Saving location ${location.location_id} ...`);
 
   const existing = await supabase.from('tesla_locations').select('location_id, data').eq('location_id', location.location_id).limit(1);
