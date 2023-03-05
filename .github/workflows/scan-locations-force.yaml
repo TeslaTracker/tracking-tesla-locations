@@ -1,4 +1,4 @@
-name: Scan locations
+name: Scan locations Forced
 on:
   workflow_dispatch:
 jobs:
