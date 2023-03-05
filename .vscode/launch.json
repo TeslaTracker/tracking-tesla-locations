@@ -7,10 +7,27 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Yarn start",
-            "runtimeExecutable": "yarn",
+            "name": "Scan",
+            "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "start"
+            ],
+            "port": 5858,
+            "cwd": "${workspaceRoot}",
+            "timeout": 10000,
+            "skipFiles": [
+                "${workspaceFolder}/<node_internals>/**",
+                "${workspaceFolder}/node_modules/**"
+                 ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Scan (force update)",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "start",
+                "-- --forceUpdate=true"
             ],
             "port": 5858,
             "cwd": "${workspaceRoot}",
